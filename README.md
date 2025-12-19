@@ -1,20 +1,18 @@
 # 3D-RE-GEN
-ToDo
 
 <p align="left">
   <strong>
-    (TODO) G-Buffer-Conditioned Diffusion for Neural Forward Frame Rendering
+    3D Reconstruction of Indoor Scenes with a Generative Framework
   </strong>
 </p>
 
-⚠️ This is work in progress please don't publish yet (will release Fri. 19 / 00:00 GMT) 
 
+<img width="2504" height="843" alt="teaser" src="https://github.com/user-attachments/assets/bc8057b2-488d-4bcc-ab05-73331066cfac" />
 
-TODO: ADD TRAILER HERE
 
 
 <p align="center">
-    <span> 🌐  <a href="https://matspray.jdihlmann.com/"> Project Page </a> </span>&nbsp;&nbsp;&nbsp;
+    <span> 🌐  <a href="https://3dregen.jdihlmann.com/"> Project Page </a> </span>&nbsp;&nbsp;&nbsp;
     <span> 📄  <a href="http://arxiv.org/abs/2401.01647"> Paper (Arxiv) </a> </span>&nbsp;&nbsp;&nbsp;
   <span>  📦  <a href="https://drive.google.com/drive/folders/1znN_KllBKllIY_1PLZUHbnfHsB6KNifR?usp=sharing"> Materials </a> </span>&nbsp;&nbsp;&nbsp;
   <span>  ✍🏻
@@ -22,23 +20,20 @@ TODO: ADD TRAILER HERE
 </p>
 
 # About
-TODO
-We propose photorealistic real-time relighting and novel view synthesis of subsurface scattering objects. We learn to reconstruct the shape and translucent appearance of an object within the 3D Gaussian Splatting framework. Our method decomposes the object into its material properties in a PBR like fashion, with an additional neural subsurface residual component. We achieve high-quality rendering results with our deferred shading approach and allow for detailed material editing capabilities.
+We propose single-image 3D scene reconstruction for producing complete, editable scenes from a single photograph. Our method reconstructs individual objects and the surrounding background as textured 3D assets, enabling coherent scene assembly from minimal input. We combine instance segmentation, context-aware generative inpainting, 2D-to-3D asset creation, and constrained optimization to recover physically plausible geometry, materials, and lighting. The resulting scenes preserve correct spatial relationships, lighting consistency, and material fidelity, making them suitable for production-ready workflows.
 
 # Code
-TODO
-Paper is currently under review, we will realse the code shortly (~ end of october 2024) in a cleaned version. Up until then if you have any questions regarding the project or need material to compare against fast, feel free to contact us. 
+Paper is currently under review, we will realse the code shortly (~ end of january 2026) in a cleaned version. Up until then if you have any questions regarding the project or need material to compare against fast, feel free to contact us. 
 
 
 
 # Citation
 You can find our paper on [arXiv](https://arxiv.org/), please consider citing, if you find this work useful:
 
-TODO
 ```
-@inproceeding{framediffuser,
-author ={Beißwenger, Ole and Dihlmann, Jan-Niklas and Lensch, Hendrik P.A.},
-title ={FrameDiffuser: G-Buffer-Conditioned Diffusion for Neural Forward Frame Rendering},
+@inproceeding{suatter20253dregen,
+author ={Sautter, Tobias and Dihlmann, Jan-Niklas and Lensch, Hendrik P.A.},
+title ={3D-RE-GEN: 3D Reconstruction of Indoor Scenes with a Generative Framework},
 booktitle ={arXiv preprint},
 year ={2025}
 }
