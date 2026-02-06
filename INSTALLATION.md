@@ -46,50 +46,54 @@ pip install "numpy<2.0"
    ```bash
    git clone --recursive https://github.com/cgtuebingen/3D-RE-GEN.git
    cd 3D-RE-GEN
-
-      If you already cloned without submodules:
-      ```bash
-      git submodule update --init --recursive
-      ```
-
-      This initializes:
-      - `Hunyuan3D-2/` - 2D-to-3D model generation
-      - `vggt/` - Camera extraction
-      - `dust3r/` - Alternative camera extraction (optional)
    ```
+
+   If you already cloned without submodules:
+   ```bash
+   git submodule update --init --recursive
+   ```
+
+   This initializes:
+   - `Hunyuan3D-2/` - 2D-to-3D model generation
+   - `vggt/` - Camera extraction
+   - `dust3r/` - Alternative camera extraction (optional)
 
 2. **Download SAM model:**
    ```bash
    cd segmentor
    wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth
    cd ..
-   
-      Location: `segmentor/sam_vit_h_4b8939.pth`
-   3. **Configure input in `src/config.yaml`:**
    ```
+   Location: `segmentor/sam_vit_h_4b8939.pth`
 
-3. **Configure input:**
-   Edit `src/config.yaml`:
+3. **HDR environment maps (optional):**
+   Large HDR files are not stored in the repo. Download them from Poly Haven:
+   - https://polyhaven.com/a/brown_photostudio_02
+
+   Place the downloaded `.hdr` in:
+   - `input_images/raw/`
+
+4. **Configure input in `src/config.yaml`:**
    ```yaml
    input_image: ../input_images/scene/your_image.jpg
    GT_scene: null  # or path to ground truth scene for evaluation
-      device_global: "cuda:0"
-
-   ### Optional: API Keys
-
-   Some features require API keys:
-
-   - **Banana.dev** (for inpainting step 2):
-      ```yaml
-      use_banana: true
-      # Requires BANANA_API_KEY environment variable or credentials file
-      ```
-
-   - **Google Gemini** (for image generation):
-      ```bash
-      export GOOGLE_API_KEY="your_api_key_here"
-      ```
+   device_global: "cuda:0"
    ```
+
+### Optional: API Keys
+
+Some features require API keys:
+
+- **Banana.dev** (for inpainting step 2):
+  ```yaml
+  use_banana: true
+  # Requires BANANA_API_KEY environment variable or credentials file
+  ```
+
+- **Google Gemini** (for image generation):
+  ```bash
+  export GOOGLE_API_KEY="your_api_key_here"
+  ```
 
 ## Running the Pipeline
 
