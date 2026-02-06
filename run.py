@@ -78,6 +78,8 @@ def run_script(
         os.path.join(cwd, "..", "src"),
         os.path.join(cwd, "..", "src", "utils"),
         os.path.join(cwd, "src", "utils"),
+        # Add Hunyuan3D-2 submodule path for hy3dgen imports
+        os.path.join(cwd, "..", "Hunyuan3D-2"),
     ]
     for src_path in candidate_src_paths:
         if os.path.isdir(src_path):

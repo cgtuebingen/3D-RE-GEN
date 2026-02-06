@@ -1,0 +1,2 @@
+../tmp/converted_from_webp.png
+../output/findings/banana/inpaint_nanoBanana/empty_room.png

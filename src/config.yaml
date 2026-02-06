@@ -4,14 +4,7 @@ logging: INFO # options : DEBUG, INFO, WARNING, ERROR, CRITICAL
 config_path: "../src/config.yaml" # path to config file
 image_url: ../tmp/converted_from_webp.png #"../input_images/scene/scene_render_better_lighting_noWalls.png"
 
-# input_image: ../3D-Front/3D-FRONT-RENDER/fed8960a-081d-4c4c-94dd-1255c2a21297/Bedroom-10773/render_0001.webp
-# input_image: ../3D-Front/3D-FRONT-RENDER/0b16abb1-4a59-4ce3-85b5-8ec10440d9dd/LivingRoom-36490/render_0003.webp
-# input_image: ../3D-Front/3D-FRONT-RENDER/ff79b941-b656-41b9-a740-5647b52b2605/DiningRoom-68889/render_0001.webp
-# input_image: ../input_images/scene/IMG_1183.jpg
-# input_image: "../input_images/scene/scene_render_better_lighting_noWalls_2.png"
-# GT_scene: "../input_scenes/living_room_test.glb" # None # if none doesnt evaluate against GT
-
-# input_image: "../input_scenes/rooms/room_011/render_001.png" #"../input_scenes/rooms/room_011/render_001.png"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 input_image: ../input_images/scene/outside_003.jpg
 GT_scene: "../input_scenes/rooms/room_011/furniture.glb" # None # if none doesnt evaluate against GT
 
@@ -39,17 +32,17 @@ temp: "../tmp"
 
 
 
-
-
 #######################################################################################################################
 # Segmentation and Upscaling Configuration 
 #######################################################################################################################
 # Configuration file for segmentation and upscaling script
 upscale_input_image: false
 labels:
- - statue
- - flower_pot
- - bank
+ - chair
+ - table
+ - sofa
+ - plant in pot
+ - lamp
  - floor
 
 

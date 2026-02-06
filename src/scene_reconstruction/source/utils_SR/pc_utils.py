@@ -55,13 +55,13 @@ def get_model_vggt_cloud(mask: np.ndarray, vggt_cloud_path: str, cameras, device
     
     H, W = mask.shape[:2]
 
-    # ✅ Keep only points that fall inside image bounds
+    # Keep only points that fall inside image bounds
     valid = (x_int >= 0) & (x_int < W) & (y_int >= 0) & (y_int < H)
     x_int = x_int[valid]
     y_int = y_int[valid]
     points3d = points3d[valid]
 
-    # ✅ Apply mask filtering
+    # Apply mask filtering
     mask_torch = torch.from_numpy(mask).to(device)
     valid_mask = mask_torch[y_int, x_int] > 0
     points3d = points3d[valid_mask]

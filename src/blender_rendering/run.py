@@ -721,6 +721,14 @@ def main():
     image = Image.open(image_path)
     image_size_x, image_size_y = image.size
 
+    # set maximum render size to 1024
+    max_size = 1280
+    if image_size_x > max_size or image_size_y > max_size:
+        scale_factor = min(max_size / image_size_x, max_size / image_size_y)
+        image_size_x = int(image_size_x * scale_factor)
+        image_size_y = int(image_size_y * scale_factor)
+        print(f"Rescaling render resolution to: {image_size_x}x{image_size_y}")
+
     # set render resolution to image size
     bpy.context.scene.render.resolution_x = image_size_x
     bpy.context.scene.render.resolution_y = image_size_y

@@ -131,6 +131,7 @@ def main(config: dict, model_name, mask_folder="../output/masks", point_cloud_fo
        config=config, device=device, width=image_size, height=target_height
     )
 
+    print("Camera size:", image_size, target_height)
 
     # # Create point cloud
     # pc_trimesh = load(config["vggt_cloud"])

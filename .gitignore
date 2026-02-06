@@ -5,6 +5,8 @@
 venv/
 env/
 ENV/
+venv_py310/
+
 
 # Python cache and compiled files
 __pycache__/
@@ -16,6 +18,7 @@ dist/
 build/
 *.egg
 .cache/
+.condarc
 
 
 # Configuration and cache files
