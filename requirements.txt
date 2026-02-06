@@ -12,7 +12,6 @@ open3d>=0.18.0
 # pytorch3d needs special installation - see ENVIRONMENT_SETUP.md
 
 # Scientific Computing
-numpy>=2.2.0
 scipy>=1.15.0
 scikit-learn>=1.7.0
 scikit-image>=0.24.0
@@ -38,9 +37,10 @@ black>=23.0.0
 pytest>=7.4.0
 
 # Data Visualization
-plotly>=6.0.0
-dash>=3.0.0
-
 # Additional ML/DL tools
 addict>=2.4.0
 configargparse>=1.7.0
+
+# NumPy constraint - Install last to ensure compatibility
+# Must be <2.0 for compatibility with some legacy dependencies
+numpy<2.0
