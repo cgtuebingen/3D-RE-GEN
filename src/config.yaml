@@ -1,0 +1,423 @@
+############# General Configuration #############
+# General settings for the application
+logging: INFO # options : DEBUG, INFO, WARNING, ERROR, CRITICAL
+config_path: "../src/config.yaml" # path to config file
+image_url: ../tmp/converted_from_webp.png #"../input_images/scene/scene_render_better_lighting_noWalls.png"
+
+# input_image: ../3D-Front/3D-FRONT-RENDER/fed8960a-081d-4c4c-94dd-1255c2a21297/Bedroom-10773/render_0001.webp
+# input_image: ../3D-Front/3D-FRONT-RENDER/0b16abb1-4a59-4ce3-85b5-8ec10440d9dd/LivingRoom-36490/render_0003.webp
+# input_image: ../3D-Front/3D-FRONT-RENDER/ff79b941-b656-41b9-a740-5647b52b2605/DiningRoom-68889/render_0001.webp
+# input_image: ../input_images/scene/IMG_1183.jpg
+# input_image: "../input_images/scene/scene_render_better_lighting_noWalls_2.png"
+# GT_scene: "../input_scenes/living_room_test.glb" # None # if none doesnt evaluate against GT
+
+# input_image: "../input_scenes/rooms/room_011/render_001.png" #"../input_scenes/rooms/room_011/render_001.png"
+input_image: ../input_images/scene/outside_003.jpg
+GT_scene: "../input_scenes/rooms/room_011/furniture.glb" # None # if none doesnt evaluate against GT
+
+# # 0005
+3d_front_scene: ../3D-Front/3D-FRONT-SCENE/
+
+# If using 3D-FRONT dataset, set this to true
+use_3d_front: false # extracts camera data from 3D-FRONT dataset .json files
+
+
+device: "cuda:0" # local level device setting for individual scripts, can be overridden by global setting
+device_global: "cuda:0" # Global device setting for all scripts, can be overridden by individual scripts
+use_all_available_cuda: false # If true, allows subprocesses to access all available CUDA devices (for multi-GPU setups)
+
+# for A40
+jobs_per_gpu: 1
+
+# Conda environment (optional): If set, uses this conda env instead of .venv directories
+# Example: "/mnt/lustre/work/lensch/lhr526/.conda/py-310-fresh" or just "py-310-fresh"
+conda_env: null  # Set to null or remove to use .venv
+
+seed: 1234567 #12345
+output: "../output"
+temp: "../tmp"
+
+
+
+
+
+#######################################################################################################################
+# Segmentation and Upscaling Configuration 
+#######################################################################################################################
+# Configuration file for segmentation and upscaling script
+upscale_input_image: false
+labels:
+ - statue
+ - flower_pot
+ - bank
+ - floor
+
+
+polygon_refinement: false # smoothes out masks from SAM with poly
+
+threshold: 0.25 #0.375 # 0.375 # Confidence threshold for filtering detections, lower values more detections
+iou_threshold: 0.5 # 0.5 # IoU threshold for filtering overlapping detections, lower values stricter
+detector_id: "IDEA-Research/grounding-dino-base" #"IDEA-Research/grounding-dino-base" #
+segmenter_id: "facebook/sam-vit-huge" #"syscv-community/sam-hq-vit-large" # "facebook/sam-vit-base" # "syscv-community/sam-hq-vit-large" #"sushmanth/sam_hq_vit_l" #"syscv-community/sam-hq-vit-large" #"facebook/sam-vit-large"
+
+output_seg: "../output/findings"
+output_seg_banana: "../output/findings/banana"
+depth_scene: "../output/findings/depth.png"
+depth_large_model: true # true for Marigold, False for depth-anything2
+
+# Use point methods for segmentation
+use_points: false # If true, use points for segmentation refinement
+point_method: "max_distance" # Options: "random", "max_entropy", "max_distance", "saliency"
+scale_bounding_boxes: 1.01 # Scale factor for extending bounding boxes when using extra points, default is 1.25 (25% larger)
+
+# Misc
+findings_padding: 5 # Padding for findings cropping
+
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# extraction options for banana
+banana_line_thickness: 3
+banana_offset_px: 5
+banana_line_color: [255, 0, 0]  # Red (RGB)
+
+# --- New: Configuration for de-emphasizing the background ---
+dim_background: false
+dim_factor: 0.35
+dim_color: [100, 100, 100]  # Light gray (RGB)
+
+# --- Bounding Box Fallback Configuration ---
+banana_bbox_thickness: 2
+banana_bbox_color: [255, 0, 0]  # Green (RGB)
+banana_bbox_padding: 6
+
+use_bbox_as_input: false # If true, use bounding box images as input for Banana.dev inpainting
+# inference vars
+genai_temperature: 1.0
+genai_top_p: 0.95
+
+# careful else $
+use_banana: true # If true, use Banana.dev for upscaling (requires API key and credits)
+use_AQ: true # If true, instead of using outlined pictures, use the object extraction application from AQ
+
+model_id: "gemini-2.5-flash-image-preview" #"gemini-3-pro-image-preview"
+
+keep_existing_banans: false # If true, skip images that have already been processed by Banana.dev
+keep_existing_empty_rooms: true # If true, skip empty room images that have already been processed by Banana.dev
+
+banana_inpainting_prompt: |
+   Extract this red marked {object}.
+   Create a single render of it with a white background.
+
+prompt_empty_room: |
+    Remove ALL objects and furniture.
+    I want a single empty room.
+    No chairs, tables, lamps, dresser, kitchen parts etc.
+    Just give me back the same room but EMPTY.
+    Same light, same perspective, same walls, floor and ceiling.
+
+# prompt_AQ: |
+#     [OBJECT EXTRACTION APPLICATION]: extract a single 3D object out of a scene. 
+#     The extracted object should appear in the white box without background from a frontal view. 
+#     Only the single selected object with border should be extracted and repaired if parts are missing.
+#     No object occluding the selected object should be reconstructed. 
+#     No accidental background leaking should be included.
+#     Use the scene as a reference and extract the object.
+
+prompt_AQ: |
+  Here is the UI of an application.
+  We want an amodal render of the single object "{object}" that needs to be extracted,
+  replacing the "Extracted Object" panel on the right, with the completed amodal object on a white background.
+  Keep the rest of the image the same.
+  
+# Fill in all missing parts of the "Extracted Object" panel on the right and centre it in the panel.
+
+# Extract this red marked {object}.
+# Create a single amodial render of it with a white background.
+# Keep the rest of the image the same.
+
+
+# Clean product shot of {object}, isolated on white background, complete object, 
+# uncropped, amodal completion, professional studio lighting, 8k resolution, 
+# highly detailed texture. Inpaint/Fill missing parts realistic.
+
+
+# No objects at all. Not even a plant or decoration.
+# Just the empty room.
+
+genai_temperature_emptyRoom: 0.5 # 0.05 # less creativity for empty room
+#Keep object dimensions.  
+#If there are objects in front, remove them. Fill in any missing parts realistically.
+
+
+output_inp_banana: "../output/findings/banana/inpaint_nanoBanana"
+
+prepped_for_hunyuan: "../output/findings/banana/prepped"
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# Configuration for upscaling
+guidance_scale: 5.0
+num_inference_steps: 50 #50
+upscaler_model_name: "SD" # Options: "SD" or "FLUX"
+size: 400
+
+
+
+
+
+############## Hunyuan3D-2.0 image to 3D models ##############
+input_folder_hy: "../output/findings/upscaled/cropped/"
+output_folder_hy: "../output/3D/"
+
+mini: false #false #true
+
+num_inf_steps_hy : 50 #150
+octree_resolution_hy : 256 #380
+num_chunks_hy : 16000 #20000
+
+# Use trimesh remeshing and simplification
+remesh: false
+remesh_target_num_faces: 50000
+
+############## Hunyuan3D-2.1 image to 3D models ##############
+use_hunyuan21: false # If true, use Hunyuan3D-2.1 model for 3D reconstruction
+
+use_parallel_hy21: true # Enable parallel processing on multiple GPUs
+enable_texture_hy21: true # Enable texture generation (requires bpy setup)
+low_vram_hy21: false # Enable low VRAM mode
+clear_output_hy21: true # Clear output directory before processing
+
+# Shape generation parameters
+steps_hy21: 30 # Number of inference steps
+guidance_scale_hy21: 5 # Guidance scale
+octree_resolution_hy21: 256 # Octree resolution
+num_chunks_hy21: 8000 # Number of chunks for processing
+check_box_rembg: true # Remove background
+
+# Texture generation parameters  
+max_num_view_hy21: 6 # Max number of views for texture generation (6-9)
+resolution_hy21: 512 # Texture resolution (512 or 768)
+
+
+
+
+
+############## dust3r camera and PC reconstruction configuration ##############
+# Server settings
+local_network: false
+server_name: null
+server_port: null
+
+# Model settings
+model_name: "DUSt3R_ViTLarge_BaseDecoder_512_linear"
+weights: null
+
+# Image processing settings
+image_size: 1024
+
+# Input/Output settings
+# input_folder: "data"
+tmp_dir: "../output/pre_3D"
+silent: true
+
+# Reconstruction settings
+as_pointcloud: true
+
+
+
+############## vggt settings #################################
+Use_VGGT: true ## !!!!!!!!!!!!!!!!!!!!!!!
+# dirs 
+camera: "../output/pre_3D/camera.npz"
+vggt_cloud: "../output/pre_3D/scene_vggt.ply"
+
+output_vggt : "../output/vggt/sparse"
+
+# vars
+vggt_scene_scale: 2.0 # 1.0
+
+# if use ba
+use_ba: false
+max_query_pts: 4096
+query_frame_num: 8
+
+fine_tracking: true
+
+max_reproj_error: 8.0
+camera_type: "SIMPLE_PINHOLE"
+
+# in not use ba
+conf_thres_value: 1.0 #1.5 #5.0 
+max_points_for_colmap: 10000000 #100000
+
+
+###### filter pointcloud ##########
+
+filter_vggt_quantile: true
+quantile_value: 0.02
+# choose either quantile or dbscan for best results, or none
+filter_vggt_dbscan: false
+dbscan_eps: 0.1
+dbscan_min_points: 10
+
+mask_shrink_pixels: 4 # pixels to erode masks for less vggt edge problems
+mask_shrink_iterations: 4 #2 # iterations to erode masks for less vggt edge
+
+
+
+
+
+############## Fit model to world position; differential rendering ##############
+# For debugging
+mask_folder: "../output/masks"
+Use_VGGT_depth: true # use vggt point cloud for depth supervision
+
+set_no_initial_rotation: true # if true ignore oriented bbox rotation
+use_rotation_grid_search: true
+grid_rotation_steps: 8 # number of rotation steps in grid search
+
+# glb_path: "../output/3D"
+glb_output_folder: "../output/glb/"
+image_size_DR: 1024 #512 #512 #1024 #512   #rescale image for faster iterations smaller resolution
+show_plot: false
+
+ignore_classes : ["wall", "floor", "ceiling", "door", "window"]
+
+full_size: "../output/findings/fullSize/"
+camera: "../output/pre_3D/camera.npz"
+
+# Settings
+set_depth_multiplier : 10 #10 # set realtive room depth
+pre_scale_factor : 100 #0.35 #0.8 #6 #5 #0.2 #0.25 # which factor to scale object before fitting
+
+# scale point cloud in z
+# cam_z_scale: 0.0000001
+regularize_depth: false #true
+
+sigma: 5e-7
+gamma: 5e-7
+
+random_init_pose : false
+
+# Loss
+use_5DOF : true #true # if true, only use x,y translation and yaw rotation
+silhoutte_loss : 0.1 # 0.05 # 0.25 # 5.0 #0.5
+loss_3d : 0.1 #4 #1.0 #100.0
+loss_bbox : 0.01 # new bbox loss weight
+background_bbox_extents: -0.02
+
+rotation_speed_mult: 8.0
+# bbox loss and size
+
+
+depth_warmup_iters: 100 # Number of iterations for depth loss warmup
+
+learning_rate: 0.005 #0.0072 # 0.003 #0.01 # 0.01 #0.003 #0.005
+max_iterations: 300 #300 # 175 #300 #200
+# early stoppage
+early_stop_grad_threshold: 0.005
+early_stop_min_iterations: 200
+
+# camera znear and zfar
+camera_znear: 0.1 #5
+camera_zfar: 50.0
+
+# for ba
+
+
+
+
+
+############## Scene Optim ####################################
+# set global metallic and roughness for all objects in scene
+roughness: 0.5 #0.75
+metallic: 0.2 #0.2
+# polished aluminium
+metallic_aluminium: 0.95
+roughness_aluminium: 0.025
+albedo_aluminium: [0.65, 0.65, 0.65, 1.0]
+list_aluminium_scene: 
+  - "lamp__(860, 264)"
+  - "car"
+
+
+# Configuration for evaluation script
+use_icp : true
+num_samples: 60000 #80000 #20480 # point cloud sample
+icp_max_iterations: 200
+icp_estimate_scale: false
+# tolerance_icp: 0.1
+
+output_ply: "../output/pointclouds/"
+
+# append combined_scene to glb_path
+glb_scene_path: "../output/glb/scene/combined_scene.glb" # predicted scene of model
+ply_scene_bp_path: "../output/pointclouds/scene/combined_scene_bp.ply" # back projected points
+
+ply_pred_points: "../output/pointclouds/scene/pred_points.ply"
+ply_gt_points: "../output/pointclouds/scene/gt_points.ply"
+
+
+#glb_scene_path_icp: "../output/glb/scene/combined_scene_icp.glb"
+
+# background meshing
+out_pc_meshed: "../output/pointclouds/meshed/"
+background_mesh_depth: 10
+point_search_radius: 0.05 # radius in which vggt ground points are searching for in towards pred scene ground
+max_ground_matching_iterations: 20
+background_remesh_percentage: 0.0
+
+
+
+
+
+############## Blender Rendering Configuration ##############
+# Configuration for Blender rendering script
+output_render: "../output/rendering/"
+#hdri_path: "../input_images/raw/kloofendal_overcast_puresky_1k.hdr"
+hdri_path: "../input_images/raw/brown_photostudio_02_8k.hdr"
+hdri_strength: 1.0 # 1.5
+hdri_rotation: 130 #130 # Rotation of the HDRI in degrees
+hdri_white_bg: false # If true, use white background instead of HDRI
+
+render_pc: false # If true, render point clouds instead of meshes
+render_GT: false
+blender_render_samples: 8
+
+# for background if empty scene availalbe
+use_baked_image_only: true # true for using gt projected, false for Marigold
+# bg strenght mults if not baked
+roughness_strength: 0.65
+metallic_strength: 0.15
+normal_strength: 0.05
+
+# Scene Management
+look: "Medium Contrast"
+view_transform: "Filmic"
+exposure: 0.4  # Default exposure
+gamma: 0.8
+
+
+
+################ Evaluation Configuration ##############
+predicted_image: "../output/rendering/render_cam1_white_bg.png"
+eval_output_dir: "../output/evaluation/"
+
+
+
+
+# MIDI configuration
+Use_MIDI: false
+use_latest_glb: false # use latest glb in folder instead of recreating it, debug for texture issues
+glb_scene_path_midi: "../output/glb/scene/combined_scene_midi.glb" # predicted scene of model
+
+midi_output: "../output/midi/"
+midi_tmp: "../tmp/midi/"
+
+detect_threshold : 0.2
+
+seg_mode: "label" # "box" or "label"
+num_inference_steps_midi: 50
+guidance_scale_midi: 7
+
+run_texture: false # TODO : make work

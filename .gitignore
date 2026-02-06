@@ -1,0 +1,132 @@
+# Virtual environments
+.venv*/
+.venv/
+*.venv*/
+venv/
+env/
+ENV/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.cache/
+
+
+# Configuration and cache files
+.DS_Store
+Thumbs.db
+*.pth
+*.pickle
+*.pkl
+*.pt
+*.pth
+*.npz
+
+# Images and media (adjust extensions as needed)
+#*.jpg
+#*.jpeg
+#*.JPG
+#*.JPEG
+*.png
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.TIF
+*.svg
+*.mp4
+*.avi
+*.mov
+*.webm
+*.pdf
+*.blend
+*.blend*
+*.glb
+*.exr
+#*.hdr
+*.psd
+*.PSD
+*.fbx
+*.FBX
+*.zbp
+*.ZBP 
+*.obj
+*.mtl
+
+# Large data files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+*.bin
+*.ply
+
+# IDE files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+# tmp/
+temp/
+*.tmp
+tmp/*
+
+# Model checkpoints and outputs
+# output/
+checkpoints/
+*/pretrained_weights/*
+*.ckpt
+*.safetensors
+
+# External repositories (exclude entirely)
+3D-Front/
+blender_scenes/
+DeepPriorAssembly/
+# dust3r/
+Gen3DSR/
+Grounded-Segment-Anything/
+gwen_edit/
+hub/
+# Hunyuan3D-2/
+Hunyuan3D-2_b/
+# Hunyuan3D-2.1/
+# MIDI-3D/
+PPO/
+REPARO/
+SAMAug/
+stable-fast-3d/
+stable-point-aware-3d/
+Total3DUnderstanding/
+#vggt/
+blender/
+
+# dont track eval stats
+output/evaluation/*
+*/checkpoints/*
+
+# Keep only your work
+!src/
+!run.py
+!pc_in_use.py
+!potential_rooms
+!Pytorch3D/
+!segmentor/
+!input_images/
+!input_scenes/
+!output/
+!README.md
+!requirements.txt
+!setup.pyblender/

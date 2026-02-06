@@ -1,0 +1,46 @@
+# 3D-RE-GEN Requirements
+# Python 3.10 with CUDA 12.1
+
+# Core PyTorch (installed from index-url)
+# torch>=2.5.1
+# torchvision>=0.20.1
+# torchaudio>=2.5.1
+# Install via: pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# 3D Processing
+open3d>=0.18.0
+# pytorch3d needs special installation - see ENVIRONMENT_SETUP.md
+
+# Scientific Computing
+numpy>=2.2.0
+scipy>=1.15.0
+scikit-learn>=1.7.0
+scikit-image>=0.24.0
+pandas>=2.3.0
+matplotlib>=3.10.0
+
+# Image Processing
+opencv-python>=4.8.0
+pillow>=12.0.0
+
+# Utilities
+tqdm>=4.66.0
+pyyaml>=6.0.0
+requests>=2.31.0
+six>=1.16.0
+
+# Development & Notebooks
+jupyter>=1.0.0
+jupyterlab>=4.0.0
+ipykernel>=6.25.0
+ipywidgets>=8.1.0
+black>=23.0.0
+pytest>=7.4.0
+
+# Data Visualization
+plotly>=6.0.0
+dash>=3.0.0
+
+# Additional ML/DL tools
+addict>=2.4.0
+configargparse>=1.7.0
