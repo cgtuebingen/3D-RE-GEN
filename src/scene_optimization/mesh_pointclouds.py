@@ -392,7 +392,7 @@ def match_grounds(
                 matched_floor_idx = nearby_indices[closest_idx].item()
                 matched_floor_indices.add(matched_floor_idx)
 
-                # Debug: In first iteration, also track ALL nearby points within radius
+                # In first iteration, also track ALL nearby points within radius
                 if iteration == 0:
                     for idx in nearby_indices.cpu().tolist():
                         matched_floor_indices.add(idx)
@@ -401,7 +401,7 @@ def match_grounds(
                 y_distance = gt_point[1].item() - closest_point[1].item()
                 y_distance_pairs.append(y_distance)
 
-                # Debug: Store 3D distances for first iteration
+                # Store 3D distances for first iteration
                 if iteration == 0 and len(y_distance_pairs) <= 10:
                     logging.debug(
                         f"      GT point {j}: Y={gt_point[1].item():.4f}, closest 3D dist={closest_3d_dist:.4f}, closest Y={closest_point[1].item():.4f}, Y-diff={y_distance:.4f}"

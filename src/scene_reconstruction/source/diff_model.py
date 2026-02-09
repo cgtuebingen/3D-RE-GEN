@@ -184,7 +184,7 @@ class Model(nn.Module):
         
         R_exploratory = so3_exponential_map(exploratory_axis_angle)[0]
 
-        #### 3. APPLY LEARNABLE ROTATION (YOUR EXISTING CODE) ################################################
+        #### 3. APPLY LEARNABLE ROTATION ################################################
         if self.config.get("use_5DOF", True):
             theta = self.rotation.view(1)
             axis_angle = torch.zeros(1, 3, device=theta.device, dtype=theta.dtype)

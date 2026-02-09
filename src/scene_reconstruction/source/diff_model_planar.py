@@ -74,14 +74,12 @@ class Model(nn.Module):
                  meshes,
                  renderer,
 
-                 plane_to_world_transform,  # <-- NEW: Pass in the transform
+                 plane_to_world_transform,
                  target_pointcloud=None,
                  cameras=None,
                  config: dict = None,
                  **kwargs):
         super().__init__()
-        
-        # ... (all your existing initializations like self.meshes, self.renderer, etc.)
         self.meshes = meshes
         self.device = meshes.device
         self.iteration = 0
@@ -94,12 +92,10 @@ class Model(nn.Module):
 
         verts = meshes.verts_list()[0]
         
-        # ✅ CRITICAL: We need to work in PLANE SPACE, not world space!
         # First, transform the initial mesh vertices to plane space
         world_to_plane = plane_to_world_transform.inverse()
         verts_in_plane = world_to_plane.transform_points(verts)
         
-        # ✅ FIX: Calculate pivot in PLANE space
         # Plane coords: X and Z are tangent to floor, Y is perpendicular (up/down)
         # Pivot should be at bottom-center: center in X-Z, minimum in Y
         verts_min = verts_in_plane.min(dim=0).values
@@ -115,10 +111,8 @@ class Model(nn.Module):
         print(f"[DEBUG] Object Y-range in plane space: [{verts_min[1]:.4f}, {verts_max[1]:.4f}]")
         print(f"[DEBUG] Expected: Y_min should be ~0 to sit on floor")
         
-        # ✅ Store vertices centered at pivot in plane space
         self.register_buffer("base_verts_plane", verts_in_plane - self.pivot_plane)
         
-        # ✅ IMPORTANT: The pivot Y should be 0 (on the floor surface)
         # We'll enforce this by always placing pivot at Y=0 in plane space
         self.register_buffer("pivot_plane_centered", torch.tensor([
             self.pivot_plane[0],  # Keep X position
@@ -143,13 +137,9 @@ class Model(nn.Module):
         # add bbox if provided
         if 'background_bbox' in kwargs and kwargs['background_bbox'] is not None:
             self.register_buffer('background_bbox', torch.tensor(kwargs['background_bbox'], device=self.device))
-  
-        # ...
 
-        # --- MODIFICATION 1: Store the plane transformation ---
         self.register_buffer('plane_to_world_matrix', plane_to_world_transform.get_matrix())
 
-        # --- MODIFICATION 2: Change the learnable parameters ---
         # The object now only moves in 2D (u,v) on the plane. Z is fixed at 0.
         self.translation_uv = nn.Parameter(
             torch.zeros(1, 2, device=self.device)
@@ -164,15 +154,10 @@ class Model(nn.Module):
         self.scale = nn.Parameter(torch.ones(1, 1, device=self.device))
 
         # We no longer need the old 3D translation and rotation
-        # self.translation = ... (REMOVED)
-        # self.rotation = ... (REMOVED)
 
     def forward(self):
         self.iteration += 1
 
-        # --- CORRECT PLANE-BASED TRANSFORMATION ---
-        
-        # ✅ STEP 1: Scale uniformly from bottom-up (pivot at base)
         # base_verts_plane are already centered at pivot, so scaling happens naturally
         scaled_verts = self.base_verts_plane * self.scale
         
@@ -190,7 +175,6 @@ class Model(nn.Module):
         # scaled_verts is (N, 3), R_plane is (1, 3, 3)
         rotated_verts = torch.matmul(scaled_verts.unsqueeze(0), R_plane.transpose(1, 2)).squeeze(0)
         
-        # ✅ STEP 3: Translate to position on floor
         # translation_uv = (X, Z) movement along the floor
         # We construct (X, 0, Z) to keep object ON the floor surface
         floor_position = torch.cat([
@@ -203,14 +187,8 @@ class Model(nn.Module):
         final_position_plane = self.pivot_plane_centered.unsqueeze(0) + floor_position  # (1, 3)
         translated_verts = rotated_verts + final_position_plane  # Broadcasting: (N, 3) + (1, 3) = (N, 3)
         
-        # ✅ STEP 4: Transform from plane space back to world space
         plane_to_world = Transform3d(matrix=self.plane_to_world_matrix, device=self.device)
-        # Add batch dimension for transform_points, then squeeze it back
         transformed_verts = plane_to_world.transform_points(translated_verts.unsqueeze(0)).squeeze(0)
-        
-        #################################################################################
-        # THE REST OF YOUR FORWARD PASS REMAINS EXACTLY THE SAME
-        #################################################################################
 
         current_mesh = Meshes(
             verts=[transformed_verts],
@@ -221,53 +199,24 @@ class Model(nn.Module):
         image = self.renderer(meshes_world=current_mesh)
 
 
-        P = image[..., 3].squeeze(0)  # Extract alpha channel as silhouette
+        P = image[..., 3].squeeze(0)
         P = torch.sigmoid(P)
 
         P = P.squeeze(0)
         T = self.image_ref.to(self.device)
-        T = (T > 0.5).float() if T.max() > 1 else T  # Ensure binary
+        T = (T > 0.5).float() if T.max() > 1 else T
 
         # Compute silhouette loss using focal loss
         focal_bce_loss = focal_loss(P, T)
         dice_loss = 1 - (2 * (P * T).sum() + 1e-6) / (P.sum() + T.sum() + 1e-6)
         loss_silhouette = 0.75 * dice_loss + 0.25 * focal_bce_loss
-        
-        #loss_silhouette = ((P - T)**2).mean() #+ 0.5 * ((P**2) * (1-T)).mean() # Focal loss component
-        # print(f"[DEBUG] Iteration {self.iteration}: Silhouette Loss = {(loss_silhouette * self.silhoutte_loss).item():.6f}")
 
         loss_3d = point_mesh_face_distance(current_mesh, self.target_pcl, min_triangle_area=1e-7)
-
-        # Unpack mesh samples and normals
-        # mesh_samples, mesh_normals = sample_points_from_meshes(current_mesh, 5000, return_normals=True)
-
-        # If your target point cloud is a Pointclouds object with normals:
-        # target_points = self.target_pcl.points_padded()  # (batch, N, 3)
-        # target_normals = self.target_pcl.normals_padded()  # (batch, N, 3)
-
-        # Compute Chamfer loss with normals
-        # chamfer_loss_p, chamfer_loss_q = chamfer_distance(
-        #     x=mesh_samples, y=target_points,
-        #     x_normals=mesh_normals, y_normals=target_normals,
-        #     point_reduction="mean"
-        # )
-        #print(f"[DEBUG] Iteration {self.iteration}: Chamfer Loss P = {chamfer_loss_p.item():.6f}, Q = {chamfer_loss_q.item():.6f}")
-        #chamfer_loss = chamfer_loss_p * 10 + chamfer_loss_q * 0.25
-
-        #centroid_loss = centroid_loss(mesh_pc, self.target_)
-        #loss_3d =  chamfer_loss
-
-        # loss_3d over time
-        # over_time_mult = max(1.0, self.iteration / self.max_it)
-        # loss_3d *= over_time_mult
-        # print(f"[DEBUG] Iteration {self.iteration}: 3D Loss = {(loss_3d * self.loss_3d_mult).item():.6f}")
         loss_bbox = 0.0
         # bbox loss if bbox provided
         if hasattr(self, 'background_bbox'):
             verts = current_mesh.verts_padded()[0]
-            loss_bbox = bounding_box_loss(verts, self.background_bbox) # weight for bbox loss
-
-        #print(f"[DEBUG] Iteration {self.iteration}: Silhouette Loss = {loss_silhouette.item():.6f}, 3D Loss = {loss_bbox_mult.item():.6f}" + (f", BBox Loss = {loss_bbox.item():.6f}" if hasattr(self, 'background_bbox') else ""))
+            loss_bbox = bounding_box_loss(verts, self.background_bbox)
 
         total_loss = (
             self.silhoutte_loss * loss_silhouette

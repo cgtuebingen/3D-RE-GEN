@@ -140,7 +140,7 @@ def create_segmentation_layout(
     fonts_dir = os.path.join("../", "fonts")
     
     possible_fonts = [
-        # Project fonts (create a fonts/ directory in your project root)
+        # Project fonts (directory in project root)
         os.path.join(fonts_dir, "Roboto-Bold.ttf"),
         os.path.join(fonts_dir, "Arial-Bold.ttf"),
         # System fonts (Linux)
@@ -204,7 +204,7 @@ def extract_AQ_object(img:PIL.Image = None, target_width: int = 1280) -> PIL.Ima
     # We know the left side (original image) was forced to target_width (1280).
     base_width = target_width
     
-    # In your logic, the overall image height determined the right panel size.
+    # The overall image height determined the right panel size.
     # So we just read the height from the loaded image.
     base_height = img.height
     
@@ -216,7 +216,7 @@ def extract_AQ_object(img:PIL.Image = None, target_width: int = 1280) -> PIL.Ima
     panel_width = base_height
     
     # --- 2. Recalculate the Box Coordinates ---
-    # These formulas are identical to your generation script.
+    # These formulas are identical to the generation script.
     
     bottom_space_for_text = int(base_height * 0.08) 
     margin = int(panel_width * 0.04)

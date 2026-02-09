@@ -81,7 +81,7 @@ def extract_marigold_data(config):
     image = load_image(source_image_path)
     print(f"Using device: {device}")
 
-    # --- 1. Get Albedo, Roughness, and Metallic (using your code) ---
+    # --- 1. Get Albedo, Roughness, and Metallic ---
     print("Running Appearance Pipeline (Albedo + Roughness + Metallic)...")
     iid_pipe = MarigoldIntrinsicsPipeline.from_pretrained(
         "prs-eth/marigold-iid-appearance-v1-1", variant="fp16", torch_dtype=torch.float16

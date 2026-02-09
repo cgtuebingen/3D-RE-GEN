@@ -29,7 +29,6 @@ from vggt.dependency.track_predict import predict_tracks
 from vggt.dependency.np_to_pycolmap import batch_np_matrix_to_pycolmap, batch_np_matrix_to_pycolmap_wo_track
 
 from utils.global_utils import load_config, save_point_cloud, B2P
-# add debugger
 import logging
 
 # save out depth map

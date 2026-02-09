@@ -239,7 +239,7 @@ def find_best_initial_yaw(
     # Perform rotation AT THE ORIGIN
     rotated_verts_batched = torch.bmm(verts_batched, R_candidates.transpose(1, 2))
 
-    # Optional debug dump of point clouds for visual inspection
+    # Optional dump of point clouds for visual inspection
     if debug_save:
         try:
             out_root = debug_dir if debug_dir is not None else "../output"
@@ -643,7 +643,7 @@ def extract_and_fit_floor_plane(
     logging.debug(f"  AXIS-ALIGNED RMSE: {forced_rmse:.6f}")
 
     # Choose the best method based on data quality
-    # IMPORTANT: For very flat floors (planarity < 0.001), use PCA normal
+    # For very flat floors (planarity < 0.001), use PCA normal
     # SVD can give wrong normals due to numerical issues with nearly-planar data
     planarity_ratio = eigenvalues[2] / eigenvalues[0]
 
@@ -678,7 +678,7 @@ def extract_and_fit_floor_plane(
     save_point_cloud(floor_pointcloud, floor_ply_path, blender_readable=True)
     logging.debug(f"Floor pointcloud saved to: {floor_ply_path}")
 
-    # Save color-coded residuals for visual debugging
+    # Save color-coded residuals for visual inspection
     final_distances = torch.abs((floor_pointcloud - plane_point) @ plane_normal)
     max_dist = final_distances.max().item()
     mean_dist = final_distances.mean().item()
@@ -908,7 +908,7 @@ def pose_matching(config, model_name, iteration, device_id):
     # clean mesh
     glb_object = clean_mesh(load_object)
 
-    # logging debugging statements
+    # logging statements
     logging.debug("GLB Object Loaded:")
     logging.debug(glb_object)
 
@@ -1076,7 +1076,7 @@ def pose_matching(config, model_name, iteration, device_id):
             device=device, dtype=torch.float32
         )
 
-    # temp render with pointcloud renderer for debug
+    # temp render with pointcloud renderer
     tp_PC = Pointclouds(points=[target_pointcloud], features=[torch.ones_like(target_pointcloud)])
 
     # estimate normals

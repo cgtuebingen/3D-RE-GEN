@@ -205,56 +205,16 @@ def visualize_pointclouds(
         save_img_to_temp(img.squeeze().cpu().numpy(), config, f"pc_debug_{name}")
 
 
-# def get_bounding_box(image: np.ndarray, threshold: float = 0.99) -> Tuple[Tuple[int, int, int, int], int]:
-#     """
-#     Compute the bounding box for an object in the image based on a simple mask.
-
-#     The image is assumed to be an RGB image. A pixel is considered part of the object if
-#     the average value across its RGB channels is less than `threshold`. The image is normalized
-#     to [0, 1] if its maximum value is greater than 1.
-
-#     Args:
-#         image: A NumPy array of shape (H, W, 3) (or (H, W, 4) if an alpha channel is present).
-#         threshold: A float threshold value. Pixels with mean RGB value less than this are "object" pixels.
-
-#     Returns:
-#         bbox: A tuple (min_row, min_col, max_row, max_col) defining the bounding box.
-#         area: The area of the bounding box (in pixels).
-#     """
-#     # Normalize the image if needed
-#     if image.max() > 1.0:
-#         image_norm = image.astype(np.float32) / 255.0
-#     else:
-#         image_norm = image.copy()
-
-#     # Compute the mask: pixels that are not "almost white" are assumed to be part of the object.
-#     mask = (np.mean(image_norm[..., :3], axis=-1) < threshold).astype(np.uint8)
-
-#     # Get non-zero mask indices
-#     nonzero = np.nonzero(mask)
-
-#     min_row = int(np.min(nonzero[0]))
-#     max_row = int(np.max(nonzero[0]))
-#     min_col = int(np.min(nonzero[1]))
-#     max_col = int(np.max(nonzero[1]))
-
-#     bbox = (min_row, min_col, max_row, max_col)
-#     area = (max_row - min_row) * (max_col - min_col)
-
-#     return bbox, area
-
-# make bounding box from cropped image dimensions, returning bbox and area
-
 
 def visualize_plane_and_axes(
     plane_to_world_transform: Transform3d,
     renderer: MeshRenderer,
     cameras: FoVPerspectiveCameras,
     output_path: str,
-    device: torch.device, # ✅ This is the device we need to use
-    object_mesh: Meshes = None,  # ✅ NEW: Optional object mesh to render with plane
-    background_image_path: str = None,  # ✅ NEW: Path to input scene image
-    image_size: tuple = None,  # ✅ NEW: (width, height) for resizing
+    device: torch.device,
+    object_mesh: Meshes = None,
+    background_image_path: str = None,
+    image_size: tuple = None,
 ):
     """
     Renders a grid representing the plane and colored axes for X, Y, Z
@@ -269,14 +229,14 @@ def visualize_plane_and_axes(
     
     # 1. Create a large, flat quad mesh for the plane
     # In plane-local coords: Y=0 is the surface, X-Z define the plane
-    plane_size = 1.0  # ✅ Made larger to ensure visibility
+    plane_size = 1.0
     plane_verts = torch.tensor([
         [-plane_size, 0, -plane_size],  # (X, Y=0, Z) - on the floor
         [ plane_size, 0, -plane_size],
         [ plane_size, 0,  plane_size],
         [-plane_size, 0,  plane_size],
-    ], dtype=torch.float32, device=device) # ✅ Added device
-    plane_faces = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.int64, device=device) # ✅ Added device
+    ], dtype=torch.float32, device=device)
+    plane_faces = torch.tensor([[0, 1, 2], [0, 2, 3]], dtype=torch.int64, device=device)
     
     print(f"Plane vertices in local coords (first corner): {plane_verts[0]}")
     transformed_plane_verts = plane_to_world_transform.transform_points(plane_verts.unsqueeze(0)).squeeze(0)
@@ -291,17 +251,17 @@ def visualize_plane_and_axes(
     axis_rad = 0.025
     # X-Axis (Red)
     x_axis_trimesh = trimesh.creation.box(bounds=[(0, -axis_rad, -axis_rad), (axis_len, axis_rad, axis_rad)])
-    x_axis_verts = torch.tensor(x_axis_trimesh.vertices, dtype=torch.float32, device=device) # ✅ Added device
-    x_axis_faces = torch.tensor(x_axis_trimesh.faces, dtype=torch.int64, device=device) # ✅ Added device
-    x_axis_tex_color = torch.tensor([1.0, 0.0, 0.0], device=device) # ✅ Added device
+    x_axis_verts = torch.tensor(x_axis_trimesh.vertices, dtype=torch.float32, device=device)
+    x_axis_faces = torch.tensor(x_axis_trimesh.faces, dtype=torch.int64, device=device)
+    x_axis_tex_color = torch.tensor([1.0, 0.0, 0.0], device=device)
     x_axis_tex = TexturesVertex(verts_features=torch.ones_like(x_axis_verts).unsqueeze(0) * x_axis_tex_color)
     x_axis_mesh = Meshes(verts=[x_axis_verts], faces=[x_axis_faces], textures=x_axis_tex)
 
     # Y-Axis (Green)
     y_axis_trimesh = trimesh.creation.box(bounds=[(-axis_rad, 0, -axis_rad), (axis_rad, axis_len, axis_rad)])
-    y_axis_verts = torch.tensor(y_axis_trimesh.vertices, dtype=torch.float32, device=device) # ✅ Added device
-    y_axis_faces = torch.tensor(y_axis_trimesh.faces, dtype=torch.int64, device=device) # ✅ Added device
-    y_axis_tex_color = torch.tensor([0.0, 1.0, 0.0], device=device) # ✅ Added device
+    y_axis_verts = torch.tensor(y_axis_trimesh.vertices, dtype=torch.float32, device=device)
+    y_axis_faces = torch.tensor(y_axis_trimesh.faces, dtype=torch.int64, device=device)
+    y_axis_tex_color = torch.tensor([0.0, 1.0, 0.0], device=device)
     y_axis_tex = TexturesVertex(verts_features=torch.ones_like(y_axis_verts).unsqueeze(0) * y_axis_tex_color)
     y_axis_mesh = Meshes(verts=[y_axis_verts], faces=[y_axis_faces], textures=y_axis_tex)
 
@@ -355,7 +315,6 @@ def visualize_plane_and_axes(
         if bg_image.max() > 1:
             bg_image = bg_image.astype(np.float32) / 255.0
         
-        # Extract alpha channel from rendered image (if available)
         if image.shape[-1] == 4:
             alpha = image[0, ..., 3].detach().cpu().numpy()[..., None]
         else:
@@ -410,7 +369,6 @@ def clean_mesh(mesh: Meshes) -> Meshes:
             faces = faces[~invalid_faces_mask]
 
             # Replace invalid vertices with the mean of the valid ones
-            # This is a simple fix; for more complex cases, you might remove them
             if valid_verts_mask.any():
                 verts[~valid_verts_mask] = verts[valid_verts_mask].mean(dim=0)
             else:
@@ -548,99 +506,6 @@ def camera_to_world_space(
     return world
 
 
-# def regularize_depth_map(depth, mask, image_ref, iterations=3, kernel_size=3):
-#     """Reduces noise while preserving edges in depth map"""
-#     # Convert to 8-bit for OpenCV (preserves relative depth)
-#     depth_8bit = cv2.normalize(depth, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-    
-#     # Apply joint bilateral filter using the RGB image as guide
-#     # This preserves depth edges that align with image edges
-#     rgb_guide = cv2.resize(image_ref, (depth.shape[1], depth.shape[0]))
-#     rgb_guide = (rgb_guide * 255).astype(np.uint8)
-    
-#     depth_regularized = cv2.ximgproc.jointBilateralFilter(
-#         depth_8bit, rgb_guide, 
-#         d=15, sigmaColor=75, sigmaSpace=75
-#     ).astype(np.float32) / 255.0
-    
-#     # Re-normalize to [0,1] within the object mask
-#     depth_masked = depth_regularized[mask > 0.25]
-#     if len(depth_masked) > 0:
-#         depth_regularized = (depth_regularized - depth_masked.min()) / (depth_masked.max() - depth_masked.min() + 1e-6)
-    
-#     # Apply slight morphological closing to remove small holes
-#     kernel = np.ones((kernel_size, kernel_size), np.uint8)
-#     depth_regularized = cv2.morphologyEx(
-#         (depth_regularized * 255).astype(np.uint8), 
-#         cv2.MORPH_CLOSE, kernel, iterations=iterations
-#     ).astype(np.float32) / 255.0
-
-#     # [x,x,3] depth regularized to [x,x]
-#     depth_regularized = depth_regularized[..., 0]
-
-#     return depth_regularized * mask  # Re-apply mask
-
-# def regularize_depth_map(depth, mask, image_ref, sigma_spatial=3.0, sigma_color=0.1):
-#     """
-#     Proper depth regularization that preserves 3D structure
-    
-#     Args:
-#         depth: Float32 depth map [0,1]
-#         mask: Binary object mask [0,1]
-#         image_ref: RGB image [0,1] for edge guidance
-#         sigma_spatial: Filter window size (pixels)
-#         sigma_color: Color similarity threshold (0-1)
-#     """
-#     # Apply mask first (critical!)
-#     depth = depth * mask
-    
-#     # Convert to consistent format
-#     depth_32 = depth.astype(np.float32)
-
-#     # Ensure the RGB guide matches the depth dimensions
-#     H, W = depth_32.shape[:2]
-#     if image_ref is None:
-#         # fallback: use gray image created from depth (no guidance)
-#         rgb_guide = cv2.cvtColor((depth_32 * 255).astype(np.uint8), cv2.COLOR_GRAY2BGR)
-#     else:
-#         rgb_uint8 = (image_ref * 255).astype(np.uint8)
-#         if rgb_uint8.shape[0] != H or rgb_uint8.shape[1] != W:
-#             rgb_guide = cv2.resize(rgb_uint8, (W, H), interpolation=cv2.INTER_LINEAR)
-#         else:
-#             rgb_guide = rgb_uint8
-
-#     # Apply JOINT BILATERAL FILTER with reasonable parameters
-#     # These values preserve depth edges that align with RGB edges but don't over-smooth
-#     try:
-#         depth_regularized = cv2.ximgproc.jointBilateralFilter(
-#             depth_32,
-#             rgb_guide,
-#             d=max(3, int(sigma_spatial)),        # Window size
-#             sigmaColor=max(1.0, sigma_color * 255.0),
-#             sigmaSpace=max(1.0, sigma_spatial)
-#         )
-#     except Exception:
-#         # Fallback: use single-image bilateral filter on the depth map
-#         depth_regularized = cv2.bilateralFilter(
-#             (depth_32 * 255).astype(np.uint8),
-#             d=max(3, int(sigma_spatial)),
-#             sigmaColor=max(1.0, sigma_color * 255.0),
-#             sigmaSpace=max(1.0, sigma_spatial)
-#         ).astype(np.float32) / 255.0
-    
-#     #  CRITICAL: DO NOT re-normalize the entire depth map!
-#     # Preserve the original depth relationships
-    
-#     # Optional: Very gentle hole filling (only where mask exists)
-#     mask_uint8 = (mask * 255).astype(np.uint8)
-#     depth_filled = cv2.inpaint(
-#         (depth_regularized * 255).astype(np.uint8),
-#         255 - mask_uint8,
-#         inpaintRadius=3,
-#         flags=cv2.INPAINT_NS
-#     ).astype(np.float32) / 255.0
-    
-#     return depth_filled * mask  # Re-apply mask
 
 
 
