@@ -34,8 +34,14 @@ cd segmentor && wget https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4
 mamba run -p ./venv_py310 python run.py -p 1 2 3 4 5 6 7 8 9
 ```
 
-<!-- # Code
-Paper is currently under review, we will realse the code shortly (~ end of january 2026) in a cleaned version - Star the Repo to not miss it. Up until then if you have any questions regarding the project or need material to compare against fast, feel free to contact us.  -->
+# ⚖️ License
+
+The source code provided in this repository is released under the **MIT License**.
+
+** Important Note on Third-Party Assets:**
+This project integrates several third-party models and libraries—including **VGGT, Segment Anything Model (SAM), Hunyuan3D-2.0, and Grounded-SAM**—which are governed by their own separate licenses. 
+
+While our code is open source, the weights and underlying code for these external models may come with stricter restrictions (e.g., non-commercial use, research-only, or attribution requirements). Users are responsible for reviewing and adhering to the specific licensing terms of each component before use.
 
 
 
